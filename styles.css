@@ -1,6 +1,20 @@
 /* Gmail Link Guard v1.3 */
 
 /* ── Plain-text URL spans (replaced anchors) ────────────────────────────── */
+.glg-link-wrapper {
+  display: inline;
+}
+
+.glg-original-text {
+  cursor: default;
+  user-select: text;
+  text-decoration: none;
+  color: inherit;
+  margin-right: 4px;
+}
+
+.glg-original-text::before { content: '['; color: #9ca3af; font-size: 0.85em; }
+.glg-original-text::after  { content: ']'; color: #9ca3af; font-size: 0.85em; }
 .glg-plain-url {
   font-family: 'Courier New', 'Menlo', monospace;
   font-size: 0.88em;

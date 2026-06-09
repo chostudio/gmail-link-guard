@@ -94,12 +94,27 @@
 
     if (!displayText) return;
 
+    const originalText = anchor.textContent.trim();
+    const showOriginal = originalText && originalText !== displayText;
+
+    const wrapper = document.createElement('span');
+    wrapper.className = 'glg-link-wrapper';
+
+    if (showOriginal) {
+      const label = document.createElement('span');
+      label.className = 'glg-original-text';
+      label.textContent = originalText;
+      wrapper.appendChild(label);
+    }
+
     const span = document.createElement('span');
     span.className = 'glg-plain-url' + (suspicious ? ' glg-plain-suspicious' : '');
     span.textContent = displayText;
     span.dataset.glgUrl = displayText;
+    wrapper.appendChild(span);
 
-    anchor.parentNode.replaceChild(span, anchor);
+    anchor.parentNode.replaceChild(wrapper, anchor);
+    processed.add(wrapper);
     processed.add(span);
   }
 
