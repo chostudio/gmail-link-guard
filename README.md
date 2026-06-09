@@ -55,8 +55,10 @@ In the top-right corner of the Extensions page, toggle the **Developer mode** sw
 ## 🛠️ How It Works
 
 1. **Manifest V3**: Complies with modern Chrome Extension standards using a lightweight and secure permissions model restricted to `https://mail.google.com/*`.
-2. **MutationObserver**: Uses a performance-optimized MutationObserver to monitor Gmail's dynamic, single-page interface, instantly rewriting incoming emails and sender profiles without lag.
-3. **DOM Rewriting**: Replaces active `<a>` elements with custom styled tags. When clicked, a secure contextual dashboard pops up near your mouse cursor highlighting domain metrics and risk assessment so you can review and manually copy/paste the link safely.
+2. **SPA Navigation & Hash Monitoring**: Gmail is a Single Page Application (SPA) that doesn't trigger full page reloads. The extension monitors URL hash changes (via both `hashchange` events and a fast polling interval) to detect when you navigate into or out of an individual email view.
+3. **Targeted Email Body Detection**: To conserve memory and CPU resources, the extension only initializes observers and replaces links when you are inside an individual email view. It waits for Gmail's email body containers (targeting selectors like `.a3s`, `.ii.gt`, or `[data-message-id]`) to render before processing.
+4. **DOM Rewriting & Cleanups**: Replaces active `<a>` elements with custom styled `<span>` tags inside the message content. When you navigate away from an email view, it automatically disconnects observers and hides any active security panels.
+5. **Secure Contextual Panel**: When clicked, a secure contextual dashboard pops up near your mouse cursor highlighting domain metrics and risk assessment so you can review and manually copy/paste the link safely.
 
 ---
 

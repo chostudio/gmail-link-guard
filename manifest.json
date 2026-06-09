@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Gmail Link Guard",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Blocks all link clicks in Gmail and shows the true destination. Copy the URL manually to stay safe from phishing.",
   "permissions": ["activeTab"],
   "host_permissions": ["https://mail.google.com/*"],
