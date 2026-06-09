@@ -5,6 +5,12 @@
   display: inline;
 }
 
+/* Button-style links render as a block so they don't squeeze into inline flow */
+.glg-button-wrapper {
+  display: block;
+  margin: 4px 0;
+}
+
 .glg-original-text {
   cursor: default;
   user-select: text;
@@ -15,6 +21,23 @@
 
 .glg-original-text::before { content: '['; color: #9ca3af; font-size: 0.85em; }
 .glg-original-text::after  { content: ']'; color: #9ca3af; font-size: 0.85em; }
+
+/* Button label gets a subtle pill style to hint it was a button */
+.glg-original-button {
+  display: inline-block;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.88em;
+  color: #374151;
+  margin-right: 6px;
+  cursor: default;
+  user-select: text;
+}
+
+.glg-original-button::before { content: '🔲 '; font-size: 0.85em; }
+.glg-original-button::after  { content: ''; }
 .glg-plain-url {
   font-family: 'Courier New', 'Menlo', monospace;
   font-size: 0.88em;

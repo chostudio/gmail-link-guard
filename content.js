@@ -41,13 +41,15 @@
 
   // ── URL helpers ──────────────────────────────────────────────────────────
 
-  function getRealUrl(href) {
-    let url = href || '';
+  function getRealUrl(href, el) {
+    // data-saferedirecturl is how Gmail wraps links in notification emails
+    let url = (el && el.getAttribute('data-saferedirecturl')) || href || '';
     try {
       if (url.startsWith('//')) url = 'https:' + url;
+      // Unwrap Google redirect (both google.com/url?q= and related forms)
       if (url.includes('google.com/url')) {
         const q = new URL(url).searchParams.get('q');
-        if (q) url = q;
+        if (q) url = decodeURIComponent(q);
       }
     } catch (e) {}
     return url;
@@ -76,6 +78,19 @@
 
   // ── Replace <a> with plain <span> ───────────────────────────────────────
 
+  // Extract the best human-readable label from any element —
+  // works for plain text, button-wrapped anchors, image-only links, etc.
+  function getVisibleLabel(el) {
+    const text = el.textContent.trim();
+    if (text) return text;
+    // Fallback: alt text from images
+    const imgs = el.querySelectorAll('img[alt]');
+    if (imgs.length) {
+      return Array.from(imgs).map(i => i.getAttribute('alt')).filter(Boolean).join(' ').trim();
+    }
+    return '';
+  }
+
   function replaceAnchor(anchor) {
     if (processed.has(anchor)) return;
     if (isInCompose(anchor)) return;
@@ -83,34 +98,54 @@
     const href = anchor.getAttribute('href') || '';
     if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
 
-    let displayText, suspicious = false;
+    let displayUrl, suspicious = false;
 
     if (href.startsWith('mailto:')) {
-      displayText = href.replace('mailto:', '');
+      displayUrl = href.replace('mailto:', '');
     } else {
-      displayText = getRealUrl(href);
-      suspicious = isLikelySuspicious(displayText);
+      displayUrl = getRealUrl(href, anchor);
+      suspicious = isLikelySuspicious(displayUrl);
     }
 
-    if (!displayText) return;
+    if (!displayUrl) return;
 
-    const originalText = anchor.textContent.trim();
-    const showOriginal = originalText && originalText !== displayText;
+    const originalText = getVisibleLabel(anchor);
+    const showOriginal = originalText && originalText !== displayUrl;
+
+    // Detect button-style links by multiple signals:
+    // - wraps a <button> or role=button element
+    // - has role=button or role=link on a styled element
+    // - contains table cells (HTML email CTA pattern)
+    // - inline style with border-radius (pill/rounded button)
+    // - class name containing 'button' or 'btn'
+    // - display is block or inline-block with min-height (sized like a button)
+    const inlineStyle = anchor.getAttribute('style') || '';
+    const cls = anchor.className || '';
+    const computedDisplay = getComputedStyle(anchor).display;
+    const isButton = !!(
+      anchor.querySelector('button, [role="button"]') ||
+      anchor.getAttribute('role') === 'button' ||
+      anchor.querySelector('td, th') ||
+      /border-radius/.test(inlineStyle) ||
+      /\bbtn\b|button/i.test(cls) ||
+      (computedDisplay === 'block') ||
+      (computedDisplay === 'inline-block' && getComputedStyle(anchor).minHeight !== '0px')
+    );
 
     const wrapper = document.createElement('span');
-    wrapper.className = 'glg-link-wrapper';
+    wrapper.className = 'glg-link-wrapper' + (isButton ? ' glg-button-wrapper' : '');
 
     if (showOriginal) {
       const label = document.createElement('span');
-      label.className = 'glg-original-text';
+      label.className = 'glg-original-text' + (isButton ? ' glg-original-button' : '');
       label.textContent = originalText;
       wrapper.appendChild(label);
     }
 
     const span = document.createElement('span');
     span.className = 'glg-plain-url' + (suspicious ? ' glg-plain-suspicious' : '');
-    span.textContent = displayText;
-    span.dataset.glgUrl = displayText;
+    span.textContent = displayUrl;
+    span.dataset.glgUrl = displayUrl;
     wrapper.appendChild(span);
 
     anchor.parentNode.replaceChild(wrapper, anchor);
