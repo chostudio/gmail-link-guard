@@ -1,0 +1,177 @@
+/* Gmail Link Guard v1.3 */
+
+/* ── Plain-text URL spans (replaced anchors) ────────────────────────────── */
+.glg-plain-url {
+  font-family: 'Courier New', 'Menlo', monospace;
+  font-size: 0.88em;
+  color: #4a90d9;
+  background: #f0f4ff;
+  border: 1px solid #c8d8f0;
+  border-radius: 3px;
+  padding: 1px 4px;
+  word-break: break-all;
+  display: inline;
+  cursor: default;
+  user-select: text;
+  line-height: 1.5;
+}
+
+.glg-plain-suspicious {
+  color: #b45309;
+  background: #fff8e6;
+  border-color: #f59e0b;
+}
+
+/* ── Click-only info panel ──────────────────────────────────────────────── */
+.glg-panel {
+  position: fixed;
+  z-index: 2147483647;
+  width: 400px;
+  max-width: calc(100vw - 28px);
+  opacity: 0;
+  transform: translateY(6px) scale(0.97);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+  font-family: -apple-system, 'Segoe UI', sans-serif;
+  display: none;
+}
+
+.glg-panel.glg-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+  display: block;
+}
+
+.glg-panel-inner {
+  background: #0c0e15;
+  border: 1px solid #1e2235;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow:
+    0 0 0 1px rgba(99,102,241,0.12),
+    0 20px 60px rgba(0,0,0,0.65),
+    0 4px 16px rgba(0,0,0,0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.glg-panel-inner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #22d3ee, #6366f1);
+  background-size: 200% 100%;
+  animation: glg-flow 3s linear infinite;
+}
+
+@keyframes glg-flow {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.glg-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.glg-panel-icon { font-size: 13px; }
+
+.glg-panel-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  color: #6366f1;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.glg-panel-close {
+  background: none;
+  border: none;
+  color: #4b5563;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  line-height: 1;
+  transition: color 0.15s, background 0.15s;
+}
+.glg-panel-close:hover { color: #e2e8f0; background: #1e2235; }
+
+.glg-panel-url {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: #c7d2fe;
+  word-break: break-all;
+  background: #131620;
+  border: 1px solid #252840;
+  border-radius: 7px;
+  padding: 9px 12px;
+  margin-bottom: 9px;
+  line-height: 1.6;
+  max-height: 80px;
+  overflow-y: auto;
+  user-select: text;
+  cursor: text;
+}
+
+.glg-url-suspicious {
+  border-color: #d97706;
+  background: #1a1400;
+}
+
+.glg-panel-meta {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 9px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.glg-panel-domain {
+  font-size: 11px;
+  color: #94a3b8;
+  background: #181b28;
+  border: 1px solid #252840;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.glg-panel-risk {
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+.glg-risk-ok {
+  color: #34d399;
+  background: #071a10;
+  border: 1px solid #064e2e;
+}
+
+.glg-risk-warn {
+  color: #fbbf24;
+  background: #1c1200;
+  border: 1px solid #7c4a00;
+  animation: glg-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes glg-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); }
+  50%      { box-shadow: 0 0 0 3px rgba(251,191,36,0.2); }
+}
+
+.glg-panel-note {
+  font-size: 11px;
+  color: #374151;
+  font-style: italic;
+  text-align: center;
+  padding: 6px 8px;
+  border: 1px dashed #1e2235;
+  border-radius: 5px;
+}
