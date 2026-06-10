@@ -245,37 +245,44 @@
 
   // ── Global click handler ─────────────────────────────────────────────────
 
+  function isInsideEmailBody(el) {
+    return EMAIL_BODY_SELECTORS.some(sel => el.closest(sel));
+  }
+
   document.addEventListener('click', (e) => {
     // Close panel on outside click
     if (panel?.classList.contains('glg-visible') && !panel.contains(e.target)) {
       hidePanel();
       return;
     }
-    // Catch any <a> tags that survived (Gmail re-renders)
-    const anchor = e.target.closest('a[href]');
-    if (anchor && !isInCompose(anchor)) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      replaceAnchor(anchor);
-      return;
-    }
-    // Click on replaced URL span
+    // Click on replaced URL span (anywhere — these are already safe plain text)
     const span = e.target.closest('.glg-plain-url[data-glg-url]');
     if (span) {
       e.stopPropagation();
       showPanel(span.dataset.glgUrl, e);
+      return;
+    }
+    // Only block/replace <a> tags that are inside the email body
+    const anchor = e.target.closest('a[href]');
+    if (anchor && !isInCompose(anchor) && isInsideEmailBody(anchor)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      replaceAnchor(anchor);
     }
   }, true);
 
   document.addEventListener('auxclick', (e) => {
     const anchor = e.target.closest('a[href]');
-    if (anchor) { e.preventDefault(); e.stopImmediatePropagation(); }
+    if (anchor && isInsideEmailBody(anchor)) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
   }, true);
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       const anchor = document.activeElement?.closest?.('a[href]');
-      if (anchor && !isInCompose(anchor)) {
+      if (anchor && !isInCompose(anchor) && isInsideEmailBody(anchor)) {
         e.preventDefault(); e.stopImmediatePropagation();
       }
     }
@@ -294,9 +301,9 @@
   // Gmail's email body lives inside a container with role="main",
   // and the actual message content is inside .a3s or [data-message-id] divs.
   const EMAIL_BODY_SELECTORS = [
-    '.a3s',           // primary message body
-    '.ii.gt',         // another Gmail body wrapper
-    '[data-message-id]', // message containers
+    '.a3s',              // primary message body
+    '.ii.gt',            // another Gmail body wrapper
+    '.adn.ads',          // expanded message container
   ];
 
   function processEmailContent() {
